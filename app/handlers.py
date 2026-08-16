@@ -1,5 +1,7 @@
 from __future__ import annotations
 
+import traceback
+
 import asyncio
 from datetime import timedelta
 from decimal import Decimal
@@ -469,45 +471,80 @@ async def ping(message: Message) -> None:
 
 @router.message(CommandStart())
 async def start(message: Message) -> None:
-    async with SessionLocal() as session:
-        player = await get_or_create_player(
-            session,
-            message.from_user.id,
-            message.from_user.username,
-            message.from_user.full_name,
-        )
+    print(
+        f"START received from user {message.from_user.id}",
+        flush=True,
+    )
 
-        today = message.date.astimezone(
-            ZoneInfo(get_settings().game_timezone)
-        ).date()
+    try:
+        async with SessionLocal() as session:
+            print("START: database session opened", flush=True)
 
-        bonus = await claim_daily(session, player, today)
-
-        token_bonus = 0
-
-        if bonus:
-            login = await session.get(DailyLogin, player.user_id)
-
-            token_bonus = await grant_daily_tokens(
+            player = await get_or_create_player(
                 session,
-                player,
-                login.consecutive_days if login else 1,
+                message.from_user.id,
+                message.from_user.username,
+                message.from_user.full_name,
             )
 
-        await session.commit()
+            print("START: player loaded", flush=True)
 
-    text = "🎮 <b>Drug Wars</b>\nBuild your trading empire."
+            today = message.date.astimezone(
+                ZoneInfo(get_settings().game_timezone)
+            ).date()
 
-    if bonus:
-        text += (
-            f"\n\n✅ Daily bonus: "
-            f"{eur(bonus)} + 🔑 {token_bonus}"
+            bonus = await claim_daily(session, player, today)
+
+            print(f"START: daily bonus = {bonus}", flush=True)
+
+            token_bonus = 0
+
+            if bonus:
+                login = await session.get(
+                    DailyLogin,
+                    player.user_id,
+                )
+
+                token_bonus = await grant_daily_tokens(
+                    session,
+                    player,
+                    login.consecutive_days if login else 1,
+                )
+
+            print(
+                f"START: token bonus = {token_bonus}",
+                flush=True,
+            )
+
+            await session.commit()
+
+            print("START: database committed", flush=True)
+
+        text = "🎮 <b>Drug Wars</b>\nBuild your trading empire."
+
+        if bonus:
+            text += (
+                f"\n\n✅ Daily bonus: "
+                f"{eur(bonus)} + 🔑 {token_bonus}"
+            )
+
+        await message.answer(
+            text,
+            reply_markup=main_menu(),
         )
 
-    await message.answer(
-        text,
-        reply_markup=main_menu(),
-    )
+        print("START: Telegram response sent", flush=True)
+
+    except Exception as error:
+        print(
+            f"START FAILED: {type(error).__name__}: {error}",
+            flush=True,
+        )
+        traceback.print_exc()
+
+        await message.answer(
+            "❌ /start failed. Check the Railway logs."
+        )
 
 
 @router.message(Command("admin"))
