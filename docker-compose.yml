@@ -1,0 +1,25 @@
+services:
+  db:
+    image: postgres:16-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-drugwars}
+      POSTGRES_USER: ${POSTGRES_USER:-drugwars}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  bot:
+    build: .
+    restart: unless-stopped
+    depends_on:
+      - db
+    environment:
+      BOT_TOKEN: ${BOT_TOKEN}
+      DATABASE_URL: postgresql+asyncpg://${POSTGRES_USER:-drugwars}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB:-drugwars}
+      GAME_TIMEZONE: ${GAME_TIMEZONE:-Europe/Amsterdam}
+      ADMIN_USER_IDS: ${ADMIN_USER_IDS:-}
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+
+volumes:
+  pgdata:

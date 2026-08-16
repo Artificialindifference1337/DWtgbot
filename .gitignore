@@ -1,0 +1,60 @@
+# Secrets / local configuration
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+
+# Local databases / runtime state
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.sqlite3-journal
+
+# Python bytecode / caches
+__pycache__/
+*.py[codz]
+*$py.class
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+.hypothesis/
+.coverage
+.coverage.*
+htmlcov/
+
+# Virtual environments
+.venv/
+venv/
+env/
+ENV/
+
+# Build / packaging
+build/
+dist/
+*.egg-info/
+.eggs/
+*.egg
+
+# Logs / temporary files
+*.log
+*.pid
+*.tmp
+.cache/
+tempCodeRunnerFile.py
+
+# IDE / OS
+.idea/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Docker / database runtime data
+pgdata/
+*.rdb
+*.aof
+
+# Local exports/backups
+backups/
+exports/

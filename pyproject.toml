@@ -1,0 +1,23 @@
+[project]
+name = "drug-wars-telegram-bot"
+version = "0.1.0"
+description = "Telegram economy strategy game MVP"
+requires-python = ">=3.12"
+dependencies = [
+  "aiogram>=3.13,<4",
+  "SQLAlchemy>=2.0,<3",
+  "aiosqlite>=0.20",
+  "asyncpg>=0.29",
+  "pydantic-settings>=2.5",
+  "APScheduler>=3.10,<4",
+]
+
+[project.optional-dependencies]
+dev = ["pytest>=8", "pytest-asyncio>=0.24", "ruff>=0.6"]
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+pythonpath = ["."]
+
+[tool.ruff]
+line-length = 100
